@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberFreq — Proximity Voice Chat for Tesla</title>
+<meta name="description" content="CyberFreq — What's your frequency? Proximity push-to-talk for verified Tesla owners. Real-time encrypted comms, live radar. Coming soon to Android.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#000;
+  --surface:rgba(255,255,255,0.04);
+  --card:rgba(255,255,255,0.06);
+  --blue:#00B3FF;
+  --blue-dim:rgba(0,179,255,0.12);
+  --blue-glow:rgba(0,179,255,0.25);
+  --white:#fff;
+  --gray:#a0a0a0;
+  --dim:#555;
+  --border:rgba(255,255,255,0.08);
+  --border-hover:rgba(0,179,255,0.3);
+}
+html{scroll-behavior:smooth}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--white);line-height:1.6;overflow-x:hidden}
+a{color:var(--blue);text-decoration:none}
+
+/* ─── Animations ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+@keyframes radarScan{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px var(--blue-glow)}50%{box-shadow:0 0 40px var(--blue-glow),0 0 80px rgba(0,179,255,0.1)}}
+
+.fade-up{opacity:0;animation:fadeUp 0.7s ease forwards}
+.delay-1{animation-delay:0.1s}
+.delay-2{animation-delay:0.2s}
+.delay-3{animation-delay:0.3s}
+.delay-4{animation-delay:0.4s}
+
+/* ─── Nav ─── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--border);background:rgba(0,0,0,0.7)}
+.nav-logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;letter-spacing:-0.3px}
+.nav-logo svg{width:32px;height:32px;border-radius:8px}
+.nav-cta{padding:8px 20px;border-radius:8px;background:var(--blue);color:#000;font-weight:700;font-size:13px;transition:opacity 0.15s,transform 0.15s}
+.nav-cta:hover{opacity:0.85;transform:translateY(-1px);color:#000}
+
+/* ─── Hero ─── */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:100px 20px 80px;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(0,179,255,0.06) 0%,transparent 70%);pointer-events:none}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,179,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,179,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 20%,transparent 80%)}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-dim);color:var(--blue);padding:6px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:28px;letter-spacing:0.3px;border:1px solid rgba(0,179,255,0.2)}
+.hero-badge::before{content:'';width:6px;height:6px;background:var(--blue);border-radius:50%;animation:pulse 2s ease infinite}
+.hero h1{font-size:clamp(40px,7vw,72px);font-weight:800;line-height:1.05;margin-bottom:20px;letter-spacing:-2px}
+.hero h1 .highlight{color:var(--blue);position:relative}
+.hero p{font-size:clamp(16px,2vw,20px);color:var(--gray);max-width:560px;margin-bottom:44px;line-height:1.6}
+.cta-group{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:56px}
+.btn{padding:15px 36px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all 0.15s;letter-spacing:-0.2px}
+.btn-primary{background:var(--blue);color:#000;animation:glow 3s ease infinite}
+.btn-primary:hover{opacity:0.9;transform:translateY(-2px);color:#000}
+.btn-secondary{background:transparent;color:var(--white);border:1px solid var(--border)}
+.btn-secondary:hover{border-color:var(--border-hover);background:var(--blue-dim)}
+
+/* Hero radar graphic */
+.hero-radar{position:relative;width:220px;height:220px;margin:0 auto}
+.radar-ring{position:absolute;border-radius:50%;border:1px solid rgba(0,179,255,0.15);top:50%;left:50%;transform:translate(-50%,-50%)}
+.radar-ring:nth-child(1){width:60px;height:60px}
+.radar-ring:nth-child(2){width:110px;height:110px}
+.radar-ring:nth-child(3){width:160px;height:160px}
+.radar-ring:nth-child(4){width:210px;height:210px}
+.radar-sweep{position:absolute;top:50%;left:50%;width:50%;height:2px;background:linear-gradient(to right,transparent,var(--blue));transform-origin:left center;animation:radarScan 3s linear infinite;border-radius:2px}
+.radar-dot{position:absolute;width:8px;height:8px;background:var(--blue);border-radius:50%;box-shadow:0 0 8px var(--blue)}
+.radar-center{position:absolute;width:12px;height:12px;background:var(--blue);border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--blue)}
+.hero-stats{display:flex;gap:32px;flex-wrap:wrap;justify-content:center}
+.hero-stat{text-align:center}
+.hero-stat-val{font-size:28px;font-weight:800;color:var(--blue);letter-spacing:-1px}
+.hero-stat-label{font-size:12px;color:var(--dim);margin-top:2px}
+
+/* ─── Section base ─── */
+section.content{padding:80px 20px;max-width:1100px;margin:0 auto}
+.section-label{font-size:12px;color:var(--blue);font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:12px}
+.section-title{font-size:clamp(26px,4vw,42px);font-weight:800;margin-bottom:12px;line-height:1.15;letter-spacing:-1px}
+.section-sub{font-size:16px;color:var(--gray);margin-bottom:48px;max-width:560px}
+
+/* ─── Features ─── */
+.feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.feature-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;transition:border-color 0.2s,transform 0.2s,background 0.2s;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.feature-card:hover{border-color:var(--border-hover);transform:translateY(-2px);background:var(--card)}
+.feature-icon{width:44px;height:44px;background:var(--blue-dim);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;font-size:20px;border:1px solid rgba(0,179,255,0.15)}
+.feature-card h3{font-size:17px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px}
+.feature-card p{font-size:14px;color:var(--gray);line-height:1.6}
+.feature-tag{display:inline-block;background:var(--blue-dim);color:var(--blue);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;margin-top:10px;letter-spacing:0.5px}
+
+/* ─── How it works ─── */
+.how-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative;margin-top:48px}
+.how-steps::before{content:'';position:absolute;top:36px;left:calc(16.67% + 20px);right:calc(16.67% + 20px);height:1px;background:linear-gradient(to right,var(--blue),transparent,var(--blue));opacity:0.3}
+.step{text-align:center;padding:24px 20px;position:relative}
+.step-num{width:72px;height:72px;background:var(--blue-dim);border:1px solid rgba(0,179,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;position:relative}
+.step-num-inner{font-size:26px;font-weight:800;color:var(--blue)}
+.step h3{font-size:17px;font-weight:700;margin-bottom:8px;letter-spacing:-0.3px}
+.step p{font-size:14px;color:var(--gray);line-height:1.5;max-width:200px;margin:0 auto}
+.step-desc{font-size:12px;color:var(--dim);margin-top:8px}
+
+/* ─── Security strip ─── */
+.security-strip{padding:40px 20px;max-width:1100px;margin:0 auto}
+.security-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.security-item{display:flex;align-items:center;gap:12px;padding:16px 20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;backdrop-filter:blur(8px)}
+.security-item-icon{font-size:18px;flex-shrink:0}
+.security-item-text{font-size:13px;font-weight:600}
+.security-item-sub{font-size:11px;color:var(--dim);margin-top:2px}
+
+/* ─── Stats ─── */
+.stats-section{padding:60px 20px;max-width:1100px;margin:0 auto}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.stat{text-align:center;padding:32px 20px;background:var(--surface);border-radius:14px;border:1px solid var(--border);backdrop-filter:blur(8px)}
+.stat-value{font-size:40px;font-weight:800;color:var(--blue);letter-spacing:-2px}
+.stat-label{font-size:13px;color:var(--gray);margin-top:4px}
+
+/* ─── CTA Section ─── */
+.cta-section{padding:80px 20px;text-align:center}
+.cta-box{max-width:600px;margin:0 auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:52px 36px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:-60px;left:50%;transform:translateX(-50%);width:300px;height:300px;background:radial-gradient(circle,rgba(0,179,255,0.08),transparent 70%);pointer-events:none}
+.cta-box h2{font-size:32px;font-weight:800;margin-bottom:12px;letter-spacing:-1px;position:relative}
+.cta-box p{color:var(--gray);margin-bottom:32px;font-size:15px;position:relative}
+.email-form{display:flex;gap:8px;max-width:420px;margin:0 auto;position:relative}
+.email-input{flex:1;padding:13px 16px;border-radius:10px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--white);font-size:14px;outline:none;transition:border-color 0.2s}
+.email-input:focus{border-color:var(--blue)}
+.email-input::placeholder{color:var(--dim)}
+.email-submit{padding:13px 24px;border-radius:10px;background:var(--blue);color:#000;border:none;font-weight:700;cursor:pointer;font-size:14px;white-space:nowrap;transition:opacity 0.15s,transform 0.15s}
+.email-submit:hover{opacity:0.9;transform:translateY(-1px)}
+.form-note{font-size:11px;color:var(--dim);margin-top:14px;position:relative}
+
+/* ─── Footer ─── */
+footer{padding:40px 20px;text-align:center;border-top:1px solid var(--border)}
+.footer-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--dim)}
+.footer-links a:hover{color:var(--gray)}
+footer p{font-size:12px;color:var(--dim)}
+
+/* ─── Foldable badge ─── */
+.foldable-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.05);border:1px solid var(--border);padding:4px 12px;border-radius:6px;font-size:11px;color:var(--gray);margin-top:10px}
+
+/* ─── Responsive ─── */
+@media(max-width:768px){
+  .how-steps{grid-template-columns:1fr;gap:0}
+  .how-steps::before{display:none}
+  .feature-grid{grid-template-columns:1fr}
+  .footer-inner{flex-direction:column;align-items:center}
+  nav{padding:12px 16px}
+  .cta-box{padding:36px 20px}
+}
+@media(max-width:600px){
+  .email-form{flex-direction:column}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .security-grid{grid-template-columns:1fr}
+  .hero-stats{gap:20px}
+}
+@media(max-width:380px){
+  .stats-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <rect width="512" height="512" rx="96" fill="#0A0A0A"/>
+      <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00B3FF"/><stop offset="100%" stop-color="#0080CC"/></linearGradient></defs>
+      <path d="M256,100 L170,300 L200,300 L240,200 L256,150 L272,200 L312,300 L342,300 Z" fill="url(#g1)"/>
+      <path d="M160,250 Q140,256 160,262" stroke="#00B3FF" stroke-width="6" fill="none" opacity="0.7"/>
+      <path d="M140,240 Q110,256 140,272" stroke="#00B3FF" stroke-width="5" fill="none" opacity="0.45"/>
+      <path d="M120,230 Q80,256 120,282" stroke="#00B3FF" stroke-width="4" fill="none" opacity="0.2"/>
+      <path d="M352,250 Q372,256 352,262" stroke="#00B3FF" stroke-width="6" fill="none" opacity="0.7"/>
+      <path d="M372,240 Q402,256 372,272" stroke="#00B3FF" stroke-width="5" fill="none" opacity="0.45"/>
+      <path d="M392,230 Q432,256 392,282" stroke="#00B3FF" stroke-width="4" fill="none" opacity="0.2"/>
+      <text x="256" y="400" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-size="60" font-weight="900" fill="white" letter-spacing="8">CF</text>
+    </svg>
+    CyberFreq
+  </div>
+  <a href="#signup" class="nav-cta">Join Waitlist</a>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+
+  <div class="hero-badge fade-up">Coming Soon to Android</div>
+  <h1 class="fade-up delay-1">Talk to the Tesla<br><span class="highlight">next to you.</span></h1>
+  <p class="fade-up delay-2">What's your frequency? CyberFreq is proximity push-to-talk built exclusively for verified Tesla owners — real-time encrypted comms, live radar, and a community already on the road.</p>
+  <div class="cta-group fade-up delay-3">
+    <a href="#signup" class="btn btn-primary">Join the Waitlist</a>
+    <a href="#features" class="btn btn-secondary">See Features</a>
+  </div>
+
+  <div class="hero-radar fade-up delay-3">
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-ring"></div>
+    <div class="radar-sweep"></div>
+    <div class="radar-center"></div>
+    <div class="radar-dot" style="top:28%;left:62%"></div>
+    <div class="radar-dot" style="top:55%;left:75%;width:6px;height:6px;opacity:0.6"></div>
+    <div class="radar-dot" style="top:70%;left:38%;width:7px;height:7px;opacity:0.8"></div>
+    <div class="radar-dot" style="top:38%;left:22%;width:5px;height:5px;opacity:0.5"></div>
+  </div>
+
+  <div class="hero-stats fade-up delay-4">
+    <div class="hero-stat">
+      <div class="hero-stat-val">6M+</div>
+      <div class="hero-stat-label">Teslas on the road</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">$0</div>
+      <div class="hero-stat-label">To get started</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">E2E</div>
+      <div class="hero-stat-label">Encrypted comms</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-val">1 mi</div>
+      <div class="hero-stat-label">Free range</div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works -->
+<section class="content" id="how-it-works">
+  <div class="section-label">How It Works</div>
+  <div class="section-title">On the road in 60 seconds.</div>
+  <div class="section-sub">Three taps and you're live. No setup, no configuration, no hassle.</div>
+  <div class="how-steps">
+    <div class="step">
+      <div class="step-num"><span class="step-num-inner">1</span></div>
+      <h3>Sign in with Tesla</h3>
+      <p>Tesla OAuth with PKCE verifies your vehicle ownership. No Tesla account, no access.</p>
+      <div class="step-desc">Secure · Official Tesla API</div>
+    </div>
+    <div class="step">
+      <div class="step-num"><span class="step-num-inner">2</span></div>
+      <h3>See Nearby Drivers on Radar</h3>
+      <p>A live minimap shows every CyberFreq user within your range with directional indicators.</p>
+      <div class="step-desc">Real-time · Up to 5 mi range</div>
+    </div>
+    <div class="step">
+      <div class="step-num"><span class="step-num-inner">3</span></div>
+      <h3>Push to Talk</h3>
+      <p>Hold the button to broadcast. Release to listen. Encrypted voice, zero delay.</p>
+      <div class="step-desc">Agora-powered · E2E encrypted</div>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="content" id="features">
+  <div class="section-label">Features</div>
+  <div class="section-title">Everything a Tesla driver<br>needs to connect.</div>
+  <div class="feature-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#9889;</div>
+      <h3>Tesla OAuth Verification</h3>
+      <p>Sign in through Tesla's official OAuth 2.0 with PKCE. Your vehicle is cryptographically verified — no Tesla, no access. The community stays clean.</p>
+      <div class="feature-tag">VERIFIED ONLY</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128225;</div>
+      <h3>Push to Talk</h3>
+      <p>Hold to broadcast, release to listen. Real-time voice like a CB radio tuned for the electric age. Works seamlessly in the background while you drive.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128205;</div>
+      <h3>Real-Time Radar</h3>
+      <p>Live proximity map with directional indicators showing nearby drivers and which way they're heading. Zoom in or out to adjust your range.</p>
+      <div class="feature-tag">LIVE</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128274;</div>
+      <h3>Encrypted Communications</h3>
+      <p>All voice and data traffic is encrypted end-to-end. WebSocket connections are JWT-authenticated. Your conversations stay private.</p>
+      <div class="feature-tag">E2E ENCRYPTED</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128227;</div>
+      <h3>Multi-Channel Support</h3>
+      <p>Open Road for general chat, Supercharger Chat at charging stations, city channels, route groups, and private crew channels. Tune in to what matters.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128680;</div>
+      <h3>Road Alerts</h3>
+      <p>Crowdsourced speed traps, hazards, and conditions from nearby drivers in real time. Intel from the community, for the community.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127942;</div>
+      <h3>Achievement System</h3>
+      <p>Earn badges for miles driven, drivers met, alerts posted, and community contributions. Build your reputation on the road.</p>
+      <div class="feature-tag">PREMIUM+</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128241;</div>
+      <h3>Foldable Display Support</h3>
+      <p>Optimized for foldable Android devices. The radar and PTT interface adapt to both folded and unfolded states for the best in-car experience.</p>
+      <div class="feature-tag">ADAPTIVE UI</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#11088;</div>
+      <h3>Premium</h3>
+      <p>Extend to 5-mile range, voice filters, custom channels, priority connection in busy areas, and exclusive profile badges. 7-day free trial.</p>
+      <div class="feature-tag">$4.99/MO</div>
+    </div>
+  </div>
+</section>
+
+<!-- Security strip -->
+<div class="security-strip">
+  <div class="security-grid">
+    <div class="security-item">
+      <div class="security-item-icon">&#128274;</div>
+      <div>
+        <div class="security-item-text">E2E Encrypted</div>
+        <div class="security-item-sub">All voice &amp; data</div>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="security-item-icon">&#9889;</div>
+      <div>
+        <div class="security-item-text">Tesla OAuth + PKCE</div>
+        <div class="security-item-sub">Verified ownership only</div>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="security-item-icon">&#128272;</div>
+      <div>
+        <div class="security-item-text">JWT Auth</div>
+        <div class="security-item-sub">Authenticated WebSockets</div>
+      </div>
+    </div>
+    <div class="security-item">
+      <div class="security-item-icon">&#127760;</div>
+      <div>
+        <div class="security-item-text">No Data Selling</div>
+        <div class="security-item-sub">Location never stored</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-section">
+  <div class="stats-grid">
+    <div class="stat">
+      <div class="stat-value">6M+</div>
+      <div class="stat-label">Teslas on the road globally</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1 mi</div>
+      <div class="stat-label">Default proximity range (free)</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">5 mi</div>
+      <div class="stat-label">Premium range</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">$0</div>
+      <div class="stat-label">To get started</div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA / Waitlist -->
+<section class="cta-section" id="signup">
+  <div class="cta-box">
+    <h2>Be the first to talk.</h2>
+    <p>Join the waitlist for early access. We'll notify you the moment CyberFreq is available on the Play Store.</p>
+    <form class="email-form" onsubmit="handleSubmit(event)">
+      <input type="email" class="email-input" placeholder="your@email.com" required>
+      <button type="submit" class="email-submit">Join Waitlist</button>
+    </form>
+    <div class="form-note">No spam. Unsubscribe anytime. Tesla owners only.</div>
+    <div id="formSuccess" style="display:none;color:#00B3FF;margin-top:16px;font-weight:700;position:relative">&#10003; You're on the list! We'll be in touch.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <p>&copy; 2026 CyberFreq. Not affiliated with Tesla, Inc.</p>
+    <div class="footer-links">
+      <a href="/privacy/">Privacy Policy</a>
+      <a href="/terms/">Terms of Service</a>
+      <a href="mailto:aicrownzllc@gmail.com">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+function handleSubmit(e) {
+  e.preventDefault();
+  e.target.style.display = 'none';
+  document.getElementById('formSuccess').style.display = 'block';
+}
+</script>
+</body>
+</html>
