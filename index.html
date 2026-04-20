@@ -623,12 +623,15 @@ footer{
   .trust-grid{grid-template-columns:1fr 1fr}
   .proof-inner{grid-template-columns:1fr;gap:40px}
   nav .nav-links{display:none}
+  /* hide desktop pill; show compact mobile pill */
+  nav .nav-cta:not(.nav-mobile-cta){display:none}
   .nav-mobile-cta{display:block}
   .how-steps::before{display:none}
 }
 @media(max-width:640px){
   nav{padding:12px 20px}
-  .hero{padding:100px 20px 60px}
+  /* don't force full-viewport height on mobile — content starts just below nav */
+  .hero{min-height:auto;padding:84px 20px 56px;justify-content:flex-start}
   .section{padding:64px 20px}
   .section-full{padding:64px 20px}
   .trust-grid{grid-template-columns:1fr}
@@ -959,20 +962,24 @@ footer{
         ▶ Get it on Google Play
       </a>
     </div>
-    <!-- iOS waitlist inline form -->
+    <!-- iOS waitlist inline form — submits to Formsubmit.co → aicrownzllc@gmail.com -->
     <div style="margin-top:32px;padding:24px 28px;border-radius:12px;border:1px solid var(--border);background:rgba(23,28,34,0.7);display:inline-block;text-align:left;max-width:420px;width:100%">
       <div class="font-tech" style="font-size:11px;color:var(--mute);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">iOS Waitlist</div>
-      <form id="waitlistForm" style="display:flex;gap:8px;flex-wrap:wrap">
-        <input type="email" id="waitlistEmail" placeholder="your@email.com" required
+      <form id="waitlistForm"
+        action="https://formsubmit.co/aicrownzllc@gmail.com"
+        method="POST"
+        style="display:flex;gap:8px;flex-wrap:wrap">
+        <!-- Formsubmit config: no captcha, custom subject, redirect back to page -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_subject" value="CyberFreq iOS Waitlist — new signup">
+        <input type="hidden" name="_next" value="https://cyberfreq.app/#signup">
+        <input type="email" name="email" placeholder="your@email.com" required
           style="flex:1;min-width:180px;padding:11px 14px;border-radius:8px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--text);font-size:14px;outline:none;font-family:'Inter',sans-serif"
           onfocus="this.style.borderColor='var(--cyan)'" onblur="this.style.borderColor='var(--border)'">
         <button type="submit" style="padding:11px 20px;border-radius:8px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Share Tech Mono',monospace;font-size:13px;cursor:pointer;transition:border-color 0.15s" onmouseover="this.style.borderColor='var(--cyan)'" onmouseout="this.style.borderColor='var(--border)'">
           Notify Me
         </button>
       </form>
-      <div id="waitlistSuccess" style="display:none;margin-top:10px;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--glow);letter-spacing:0.06em">
-        ✓ You're on the list. We'll reach out.
-      </div>
     </div>
     <div class="cta-note" style="margin-top:20px">No spam · Unsubscribe anytime · Tesla owners only</div>
   </div>
@@ -1017,13 +1024,6 @@ function wirePtt(id) {
   el.addEventListener('touchend', release);
 }
 wirePtt('heroPtt');
-
-// iOS waitlist form
-document.getElementById('waitlistForm').addEventListener('submit', function(e) {
-  e.preventDefault();
-  this.style.display = 'none';
-  document.getElementById('waitlistSuccess').style.display = 'block';
-});
 
 // Intersection observer — fade in sections on scroll
 const io = new IntersectionObserver(entries => {
