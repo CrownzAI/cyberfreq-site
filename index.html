@@ -5,25 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CyberFreq — Push-to-Talk for Tesla Drivers</title>
 <meta name="description" content="CyberFreq — proximity push-to-talk for verified Tesla drivers. Tesla Fleet API approved. Patent-pending. Available on Google Play.">
-<!-- Favicon + touch icons -->
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-<meta name="theme-color" content="#0B0E11">
-<meta name="msapplication-TileColor" content="#0B0E11">
-<!-- Open Graph -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://cyberfreq.app/">
-<meta property="og:title" content="CyberFreq — Push-to-Talk for Tesla Drivers">
-<meta property="og:description" content="Proximity push-to-talk for verified Tesla drivers. ~500m range. Tesla Fleet API approved. Patent-pending.">
-<meta property="og:image" content="https://cyberfreq.app/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CyberFreq — Push-to-Talk for Tesla Drivers">
-<meta name="twitter:description" content="Proximity push-to-talk for verified Tesla drivers. ~500m range. Tesla Fleet API approved.">
-<meta name="twitter:image" content="https://cyberfreq.app/og-image.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -110,7 +91,7 @@ nav{
   font-family:'Audiowide',system-ui,sans-serif;
   font-size:18px;letter-spacing:0.05em;color:var(--text);
 }
-.nav-logo img{width:36px;height:36px;display:block;flex-shrink:0}
+.nav-logo svg{width:32px;height:32px;border-radius:8px}
 .nav-links{
   display:flex;align-items:center;gap:32px;
   font-family:'Share Tech Mono',ui-monospace,monospace;
@@ -675,10 +656,25 @@ footer{
 
 <!-- ── NAV ── -->
 <nav>
-  <a href="/" class="nav-logo" aria-label="CyberFreq home">
-    <img src="/assets/icon-48.png" alt="CyberFreq" width="36" height="36" style="border-radius:8px;display:block">
+  <div class="nav-logo">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+      <rect width="512" height="512" rx="96" fill="#0A0E11"/>
+      <defs>
+        <linearGradient id="cfg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#5CE1E6"/>
+          <stop offset="100%" stop-color="#2EF6A6"/>
+        </linearGradient>
+      </defs>
+      <path d="M256,100 L170,300 L200,300 L240,200 L256,150 L272,200 L312,300 L342,300 Z" fill="url(#cfg)"/>
+      <path d="M160,250 Q140,256 160,262" stroke="#5CE1E6" stroke-width="6" fill="none" opacity="0.7"/>
+      <path d="M140,240 Q110,256 140,272" stroke="#5CE1E6" stroke-width="5" fill="none" opacity="0.45"/>
+      <path d="M120,230 Q80,256 120,282" stroke="#5CE1E6" stroke-width="4" fill="none" opacity="0.2"/>
+      <path d="M352,250 Q372,256 352,262" stroke="#5CE1E6" stroke-width="6" fill="none" opacity="0.7"/>
+      <path d="M372,240 Q402,256 372,272" stroke="#5CE1E6" stroke-width="5" fill="none" opacity="0.45"/>
+      <path d="M392,230 Q432,256 392,282" stroke="#5CE1E6" stroke-width="4" fill="none" opacity="0.2"/>
+    </svg>
     CYBERFREQ
-  </a>
+  </div>
   <div class="nav-links">
     <a href="#platform">Platform</a>
     <a href="#verification">Verification</a>
