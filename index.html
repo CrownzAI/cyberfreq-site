@@ -962,14 +962,14 @@ footer{
         ▶ Get it on Google Play
       </a>
     </div>
-    <!-- iOS waitlist inline form — submits to Formsubmit.co → aicrownzllc@gmail.com -->
+    <!-- iOS waitlist — dual submit: Formsubmit email + Google Sheet storage -->
     <div style="margin-top:32px;padding:24px 28px;border-radius:12px;border:1px solid var(--border);background:rgba(23,28,34,0.7);display:inline-block;text-align:left;max-width:420px;width:100%">
       <div class="font-tech" style="font-size:11px;color:var(--mute);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px">iOS Waitlist</div>
+      <!-- no-JS fallback: native POST to Formsubmit -->
       <form id="waitlistForm"
         action="https://formsubmit.co/aicrownzllc@gmail.com"
         method="POST"
         style="display:flex;gap:8px;flex-wrap:wrap">
-        <!-- Formsubmit config: no captcha, custom subject, redirect back to page -->
         <input type="hidden" name="_captcha" value="false">
         <input type="hidden" name="_subject" value="CyberFreq iOS Waitlist — new signup">
         <input type="hidden" name="_next" value="https://cyberfreq.app/#signup">
@@ -980,6 +980,9 @@ footer{
           Notify Me
         </button>
       </form>
+      <div id="waitlistSuccess" style="display:none;font-family:'Share Tech Mono',monospace;font-size:12px;color:var(--glow);letter-spacing:0.06em">
+        ✓ You're on the list. We'll reach out when iOS launches.
+      </div>
     </div>
     <div class="cta-note" style="margin-top:20px">No spam · Unsubscribe anytime · Tesla owners only</div>
   </div>
@@ -1024,6 +1027,50 @@ function wirePtt(id) {
   el.addEventListener('touchend', release);
 }
 wirePtt('heroPtt');
+
+// ── Waitlist dual-submit ──────────────────────────────────────────────────────
+// Replace PLACEHOLDER_APPS_SCRIPT_URL with your deployed Apps Script URL.
+// See docs/WAITLIST_SETUP.md for the 5-minute setup guide.
+// Until replaced, Formsubmit email notifications still work — no signups lost.
+const WAITLIST_SHEET_URL = 'PLACEHOLDER_APPS_SCRIPT_URL';
+
+document.getElementById('waitlistForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  var email = this.querySelector('[name="email"]').value.trim();
+  if (!email) return;
+
+  // Show success immediately — don't block UX on network
+  this.style.display = 'none';
+  document.getElementById('waitlistSuccess').style.display = 'block';
+
+  // 1. Formsubmit AJAX → instant email to aicrownzllc@gmail.com
+  fetch('https://formsubmit.co/ajax/aicrownzllc@gmail.com', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      _subject: 'CyberFreq iOS Waitlist \u2014 new signup',
+      _captcha: 'false'
+    }),
+    keepalive: true
+  }).catch(function() {});
+
+  // 2. Google Apps Script → persistent row in Google Sheet
+  // Uses no-cors + URLSearchParams (simple request, no preflight)
+  if (WAITLIST_SHEET_URL !== 'PLACEHOLDER_APPS_SCRIPT_URL') {
+    fetch(WAITLIST_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      keepalive: true,
+      body: new URLSearchParams({
+        email: email,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer || 'direct'
+      })
+    }).catch(function() {});
+  }
+});
+// ─────────────────────────────────────────────────────────────────────────────
 
 // Intersection observer — fade in sections on scroll
 const io = new IntersectionObserver(entries => {
