@@ -1029,10 +1029,7 @@ function wirePtt(id) {
 wirePtt('heroPtt');
 
 // ── Waitlist dual-submit ──────────────────────────────────────────────────────
-// Replace PLACEHOLDER_APPS_SCRIPT_URL with your deployed Apps Script URL.
-// See docs/WAITLIST_SETUP.md for the 5-minute setup guide.
-// Until replaced, Formsubmit email notifications still work — no signups lost.
-const WAITLIST_SHEET_URL = 'PLACEHOLDER_APPS_SCRIPT_URL';
+const WAITLIST_WORKER_URL = 'https://cyberfreq-waitlist.brandlens.workers.dev';
 
 document.getElementById('waitlistForm').addEventListener('submit', function(e) {
   e.preventDefault();
@@ -1043,8 +1040,8 @@ document.getElementById('waitlistForm').addEventListener('submit', function(e) {
   this.style.display = 'none';
   document.getElementById('waitlistSuccess').style.display = 'block';
 
-  // 1. Formsubmit AJAX → instant email to aicrownzllc@gmail.com
-  fetch('https://formsubmit.co/ajax/aicrownzllc@gmail.com', {
+  // 1. Formsubmit AJAX → instant email notification
+  fetch('https://formsubmit.co/ajax/hello@cyberfreq.app', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({
@@ -1055,20 +1052,17 @@ document.getElementById('waitlistForm').addEventListener('submit', function(e) {
     keepalive: true
   }).catch(function() {});
 
-  // 2. Google Apps Script → persistent row in Google Sheet
-  // Uses no-cors + URLSearchParams (simple request, no preflight)
-  if (WAITLIST_SHEET_URL !== 'PLACEHOLDER_APPS_SCRIPT_URL') {
-    fetch(WAITLIST_SHEET_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      keepalive: true,
-      body: new URLSearchParams({
-        email: email,
-        user_agent: navigator.userAgent,
-        referrer: document.referrer || 'direct'
-      })
-    }).catch(function() {});
-  }
+  // 2. Cloudflare Worker → persistent KV storage
+  fetch(WAITLIST_WORKER_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email: email,
+      user_agent: navigator.userAgent,
+      referrer: document.referrer || 'direct'
+    }),
+    keepalive: true
+  }).catch(function() {});
 });
 // ─────────────────────────────────────────────────────────────────────────────
 
