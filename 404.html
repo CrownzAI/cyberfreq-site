@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CyberFreq</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --deep:#0B0E11;
+  --text:#F2F4F8;
+  --mute:#7A848E;
+  --cyan:#5CE1E6;
+}
+body{
+  background:var(--deep);
+  color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  text-align:center;
+}
+.box{max-width:480px;padding:40px 32px}
+h1{
+  font-family:'Audiowide',monospace;
+  font-size:1.4rem;
+  color:var(--cyan);
+  letter-spacing:.1em;
+  margin-bottom:16px;
+}
+p{color:var(--mute);font-size:15px;line-height:1.7;margin-bottom:12px}
+a{color:var(--cyan);text-decoration:none}
+a:hover{text-decoration:underline}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<script>
+// Proxy Tesla Fleet OAuth callback → Render backend.
+// Tesla registers https://cyberfreq.app/auth/fleet/callback as the redirect URI;
+// GitHub Pages can't handle it, so we forward it to the Render server here.
+(function () {
+  var p = window.location.pathname;
+  if (p.indexOf('/auth/fleet/') === 0) {
+    var dest = 'https://walkietalk-server.onrender.com' + p + window.location.search;
+    window.location.replace(dest);
+  }
+})();
+</script>
+</head>
+<body>
+<div class="box">
+  <h1>CYBERFREQ</h1>
+  <p>Page not found.</p>
+  <p><a href="https://cyberfreq.app">← Back to cyberfreq.app</a></p>
+</div>
+</body>
+</html>
