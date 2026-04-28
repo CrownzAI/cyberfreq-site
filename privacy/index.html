@@ -253,43 +253,64 @@ footer{
   <div class="page-eyebrow">Legal · Privacy</div>
   <h1 class="page-title">Privacy Policy</h1>
   <div class="page-meta">
-    <span>Effective: April 21, 2026</span>
-    <span>Last Updated: April 21, 2026</span>
-    <span>Controller: CyberFreq (Felix / AICrownz)</span>
-    <span>Contact: <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a></span>
+    <span>Effective: April 27, 2026</span>
+    <span>Last Updated: April 27, 2026</span>
+    <span>Controller: AICrownz LLC (CyberFreq)</span>
+    <span>Contact: <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a></span>
   </div>
 
   <div class="prose">
 
     <h2>1. Overview</h2>
-    <p>CyberFreq is a push-to-talk (PTT) voice communication app for verified Tesla vehicle owners. This policy explains what data we collect, why, and your rights under GDPR (EU/EEA/UK residents) and CCPA (California residents).</p>
+    <p>CyberFreq is a push-to-talk (PTT) voice communication app for verified Tesla vehicle owners. The app pairs to your Tesla, opens proximity-based voice channels with nearby drivers, and includes a community driver-rating system. This policy explains what data we collect, why, and your rights under GDPR (EU/EEA/UK residents), CCPA/CPRA (California residents), and Google Play's User Data policy.</p>
     <p><strong>We do not sell your data. We do not run ads. We do not use third-party analytics trackers.</strong></p>
+    <p>The data controller is <strong>AICrownz LLC</strong>, operating the CyberFreq service. Contact for any privacy matter: <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a>.</p>
 
     <h2>2. Data We Collect</h2>
 
     <h3>2.1 Tesla OAuth Data (Read-Only)</h3>
-    <p>When you sign in with Tesla, we request the following OAuth scopes — <strong>read-only, no control access</strong>:</p>
+    <p>When you sign in with Tesla, we request the following Tesla Fleet API scopes — <strong>read-only; no commands; no energy</strong>:</p>
     <table>
       <thead>
         <tr><th>Scope</th><th>What We Read</th><th>Why</th></tr>
       </thead>
       <tbody>
-        <tr><td><code>user_data</code></td><td>Name, email, Tesla account ID</td><td>Account identity, profile display</td></tr>
+        <tr><td><code>profile</code></td><td>Name, email, Tesla account ID</td><td>Account identity, profile display</td></tr>
         <tr><td><code>vehicle_information</code></td><td>Vehicle model, VIN (hashed), region</td><td>Verification badge, fleet grouping</td></tr>
-        <tr><td><code>vehicle_location</code></td><td>Approximate location (resolved to grid cell)</td><td>Proximity matching for PTT radius</td></tr>
+        <tr><td><code>vehicle_location</code></td><td>Approximate location during active session</td><td>Proximity matching for PTT radius</td></tr>
       </tbody>
     </table>
-    <p class="note"><strong>We never request:</strong> unlock, start, climate, charging control, or any write-access Tesla scopes.</p>
-    <p><strong>Location handling:</strong> Raw GPS coordinates are processed server-side only to compute relative proximity between users. Precise coordinates are never transmitted to or stored on other users' devices. We store only a coarse grid cell (≈1 km resolution) for the duration of your active session.</p>
+    <p class="note"><strong>We never request:</strong> unlock, start, climate, charging control, energy products, or any write-access / command Tesla scopes. CyberFreq cannot send commands to your vehicle and cannot read or control any Powerwall, Solar, or energy product on your account.</p>
+    <p><strong>Location handling:</strong> Vehicle location is read from Tesla only while you have an active CyberFreq session. Server-side, raw coordinates are immediately resolved to a coarse grid cell (≈1 km resolution) for proximity matching. Precise coordinates are never transmitted to other users' devices and are not retained after the session ends.</p>
 
-    <h3>2.2 Voice (PTT Audio)</h3>
+    <h3>2.2 Microphone &amp; Voice (PTT Audio)</h3>
+    <p>CyberFreq requests the <strong>microphone (RECORD_AUDIO)</strong> permission so you can transmit on push-to-talk channels. The microphone is only active while you are actively pressing the talk button.</p>
     <ul>
-      <li>Audio captured during push-to-talk is <strong>ephemeral</strong> — streamed in real time and never written to disk on our servers.</li>
-      <li>No voice recordings are stored, replayed, or analyzed.</li>
-      <li>Audio is deleted from memory upon channel release.</li>
+      <li>Audio captured during push-to-talk is <strong>ephemeral</strong> — streamed in real time over the voice channel and never written to disk on our servers.</li>
+      <li>No voice recordings are stored, replayed, transcribed, or analyzed by us or by any third party.</li>
+      <li>Audio buffers are released from memory the moment a transmission ends.</li>
+      <li>We do not use voice for biometric identification or speech-to-text.</li>
     </ul>
 
-    <h3>2.3 Account Data</h3>
+    <h3>2.3 Bluetooth &amp; Auto-Launch</h3>
+    <p>CyberFreq can automatically open a session when your phone connects to your verified Tesla's Bluetooth (a feature you can disable in Settings). To support this, the app uses the Android <code>BLUETOOTH_CONNECT</code> permission to detect connection events.</p>
+    <ul>
+      <li>We do not pair, scan, or read data from any Bluetooth device other than identifying that a connection event matches your verified Tesla.</li>
+      <li>No audio is routed over Bluetooth in a way that captures device microphones outside your phone.</li>
+      <li>You can revoke this permission any time in Android Settings; auto-launch will simply turn off.</li>
+    </ul>
+
+    <h3>2.4 Photos &amp; Media (READ_MEDIA_IMAGES)</h3>
+    <p>The Android manifest declares <code>READ_MEDIA_IMAGES</code> because the React Native / Expo media stack used by the app references the system image picker. This permission is <strong>only used if you choose to upload a profile picture</strong> from your device's photo library.</p>
+    <ul>
+      <li>We do not scan, index, or upload your photo library in the background.</li>
+      <li>We never read media files unless you explicitly tap "Choose photo" inside the app and pick one image.</li>
+      <li>If you select an image, only that single image is transmitted, resized to a small avatar, and stored against your CyberFreq profile. The original is not retained.</li>
+      <li>You can deny or revoke this permission at any time in Android Settings; CyberFreq will continue to work without a custom profile photo.</li>
+    </ul>
+
+    <h3>2.5 Account Data</h3>
+    <p>Account and rating data are kept in a SQLite database on our server. The geospatial index used for proximity matching stores only the active-session grid cell described in §2.1; it is not a long-term location history.</p>
     <table>
       <thead>
         <tr><th>Field</th><th>Stored</th><th>Retention</th></tr>
@@ -298,16 +319,19 @@ footer{
         <tr><td>Tesla account ID (hashed)</td><td>Yes</td><td>Until account deletion</td></tr>
         <tr><td>Display name</td><td>Yes</td><td>Until account deletion</td></tr>
         <tr><td>Vehicle model + region</td><td>Yes</td><td>Until account deletion</td></tr>
-        <tr><td>Driver rating score</td><td>Yes</td><td>Until account deletion</td></tr>
+        <tr><td>Profile image (if you upload one)</td><td>Yes</td><td>Until you remove it or delete account</td></tr>
+        <tr><td>Driver rating score (4 dimensions: language, aggression, spam, helpfulness)</td><td>Yes</td><td>Until account deletion</td></tr>
+        <tr><td>Active-session grid cell (≈1 km)</td><td>Session only</td><td>Cleared when session ends</td></tr>
         <tr><td>Session timestamps (login/logout)</td><td>Yes</td><td>90 days, then purged</td></tr>
-        <tr><td>In-app purchases (Premium)</td><td>Yes</td><td>Per legal requirement (7 years)</td></tr>
+        <tr><td>Premium subscription state &amp; purchase records</td><td>Yes</td><td>Per legal/tax requirement (up to 7 years)</td></tr>
       </tbody>
     </table>
+    <p><strong>Driver ratings:</strong> The 4-dimension rating system aggregates community feedback. Premium-tier members can vote; ratings are stored against your account so other drivers can see your tier badge. Individual votes are anonymized — you cannot see who rated you.</p>
 
-    <h3>2.4 Device &amp; Technical Data</h3>
-    <p>We log standard server-side data:</p>
+    <h3>2.6 Device &amp; Technical Data</h3>
+    <p>We log standard server-side data needed to operate and secure the service:</p>
     <ul>
-      <li>IP address (used for abuse prevention, retained 30 days)</li>
+      <li>IP address (used for abuse prevention and rate-limiting, retained 30 days)</li>
       <li>App version, OS version, device model (for crash diagnostics)</li>
       <li>Error logs (anonymized after 14 days)</li>
     </ul>
@@ -328,14 +352,26 @@ footer{
       </tbody>
     </table>
 
-    <h2>4. Data Sharing</h2>
-    <p>We share your data only with:</p>
-    <ul>
-      <li><strong>Tesla, Inc.</strong> — to authenticate your identity via their OAuth 2.0 service. Governed by Tesla's own Privacy Policy.</li>
-      <li><strong>Payment processor</strong> — for Premium subscriptions (Stripe or equivalent). Card data is never held by CyberFreq directly.</li>
-      <li><strong>Infrastructure providers</strong> — hosting, CDN, and database providers under data processing agreements with GDPR-compliant terms.</li>
-    </ul>
-    <p>We do <strong>not</strong> share your data with data brokers, advertisers, or third-party analytics companies.</p>
+    <h2>4. Data Sharing &amp; Sub-processors</h2>
+    <p>We share data only with the following service providers (sub-processors), each under a data processing agreement with GDPR-compliant terms. None of them receive payment for the data — they process it on our behalf to deliver the service.</p>
+    <table>
+      <thead>
+        <tr><th>Provider</th><th>Purpose</th><th>Data Shared</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Tesla, Inc.</strong></td><td>Vehicle owner verification &amp; Fleet API (read-only)</td><td>OAuth identity tokens</td></tr>
+        <tr><td><strong>Stripe, Inc.</strong> (via ExtensionPay)</td><td>Premium subscription payments</td><td>Email, billing details (handled directly by Stripe; CyberFreq never sees card numbers). Stripe account: <code>acct_1TNLS2IUrGu95Vjv</code>.</td></tr>
+        <tr><td><strong>ExtensionPay</strong></td><td>Subscription/checkout flow that fronts Stripe</td><td>Email, subscription state</td></tr>
+        <tr><td><strong>Render, Inc.</strong></td><td>Server hosting (API, WebSockets, SQLite)</td><td>All server-side data described in §2 is processed on Render infrastructure</td></tr>
+        <tr><td><strong>Cloudflare, Inc.</strong></td><td>CDN, DNS, edge security for cyberfreq.app</td><td>Connection metadata (IP, user agent) for the marketing site and any edge-routed traffic</td></tr>
+        <tr><td><strong>Anthropic, PBC</strong></td><td>AI moderation / "super-brain" classification of community reports</td><td>Anonymized text snippets from user-submitted reports (no identifiers attached)</td></tr>
+        <tr><td><strong>OpenRouter</strong></td><td>Routing layer for the moderation/AI super-brain calls</td><td>Same anonymized content as Anthropic; OpenRouter relays the API call</td></tr>
+        <tr><td><strong>Sentry</strong> (if enabled in a build)</td><td>Crash &amp; error reporting</td><td>Stack traces and device metadata; user identifiers are scrubbed where present</td></tr>
+        <tr><td><strong>Google Play / Google LLC</strong></td><td>App distribution &amp; install integrity</td><td>Standard Play Store install metadata governed by Google's policies</td></tr>
+      </tbody>
+    </table>
+    <p>We do <strong>not</strong> share your data with data brokers, advertisers, or third-party analytics companies. We do not sell or "share" personal information for cross-context behavioral advertising as defined by CCPA/CPRA.</p>
+    <p><strong>International transfers:</strong> Several sub-processors above are based in the United States. Where required, transfers from the EU/EEA/UK rely on Standard Contractual Clauses or equivalent safeguards published by each provider.</p>
 
     <h2>5. Cookies &amp; Tracking</h2>
     <p>CyberFreq is a mobile app. We do not use web cookies. On-device, we store:</p>
@@ -358,7 +394,7 @@ footer{
       <li><strong>Object</strong> — object to processing based on legitimate interest</li>
       <li><strong>Withdraw consent</strong> — revoke Tesla OAuth at any time via your Tesla account settings</li>
     </ul>
-    <p>To exercise any right, email <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a> with subject "GDPR Request". We will respond within 30 days.</p>
+    <p>To exercise any right, email <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a> with subject "GDPR Request". We will respond within 30 days.</p>
     <p>If you are unsatisfied with our response, you may lodge a complaint with your local supervisory authority (e.g., the ICO in the UK, or your EU member state's DPA).</p>
 
     <h3>CCPA (California Residents)</h3>
@@ -369,7 +405,7 @@ footer{
       <li><strong>Opt out of sale</strong> — we do not sell personal information (no opt-out needed)</li>
       <li><strong>Non-discrimination</strong> — exercising your rights will not affect your service</li>
     </ul>
-    <p>To submit a CCPA request: email <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a> with subject "CCPA Request". We will respond within 45 days.</p>
+    <p>To submit a CCPA request: email <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a> with subject "CCPA Request". We will respond within 45 days.</p>
 
     <h2>7. Data Retention</h2>
     <table>
@@ -384,10 +420,10 @@ footer{
         <tr><td>Purchase records</td><td>7 years (legal obligation)</td></tr>
       </tbody>
     </table>
-    <p>To delete your account: Settings → Account → Delete Account, or email <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a>.</p>
+    <p>To delete your account: Settings → Account → Delete Account, or email <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a>.</p>
 
     <h2>8. Children's Privacy</h2>
-    <p>CyberFreq is not directed at users under 18. We do not knowingly collect data from minors. If you believe a minor has created an account, contact <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a> and we will delete it promptly.</p>
+    <p>CyberFreq is not directed at users under 18. We do not knowingly collect data from minors. If you believe a minor has created an account, contact <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a> and we will delete it promptly.</p>
 
     <h2>9. Security</h2>
     <p>We implement:</p>
@@ -397,14 +433,14 @@ footer{
       <li>OAuth tokens stored with PKCE flow — never exposed server-side</li>
       <li>Hashed VIN identifiers (SHA-256 + salt)</li>
     </ul>
-    <p>No security system is perfect. If you discover a vulnerability, please disclose responsibly to <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a>.</p>
+    <p>No security system is perfect. If you discover a vulnerability, please disclose responsibly to <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a>.</p>
 
     <h2>10. Changes to This Policy</h2>
     <p>We will notify users of material changes via in-app notification at least 14 days before changes take effect. The "Last Updated" date at the top of this document reflects the current version.</p>
 
     <h2>11. Contact</h2>
     <p><strong>CyberFreq Privacy</strong><br>
-    Email: <a href="mailto:hello@cyberfreq.app">hello@cyberfreq.app</a><br>
+    Email: <a href="mailto:aicrownzllc@gmail.com">aicrownzllc@gmail.com</a><br>
     Website: <a href="https://cyberfreq.app">https://cyberfreq.app</a></p>
 
   </div>
@@ -417,7 +453,7 @@ footer{
       <div class="footer-brand">CYBERFREQ</div>
       <div class="footer-legal">
         &copy; 2026 CyberFreq · Not affiliated with Tesla, Inc.<br>
-        hello@cyberfreq.app
+        aicrownzllc@gmail.com
       </div>
       <div class="footer-stamps">
         <div class="footer-stamp">Tesla Fleet API ✓</div>
@@ -429,7 +465,7 @@ footer{
     <div class="footer-links">
       <a href="/privacy/" aria-current="page">Privacy Policy</a>
       <a href="/terms/">Terms of Service</a>
-      <a href="mailto:hello@cyberfreq.app">Contact</a>
+      <a href="mailto:aicrownzllc@gmail.com">Contact</a>
     </div>
   </div>
 </footer>
